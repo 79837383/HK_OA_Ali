@@ -13,20 +13,13 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="format-detection" content="telephone=no">
         <link rel="stylesheet" href="../static/css/x-admin.css" media="all">
+         <link rel="stylesheet" href="../static/css/MyExtend.css" media="all">
 
         <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
         <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
         <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-{#            <style>#}
-{#        .selectFile#}
-{#        {#}
-{#position: absolute;#}
-{#    overflow: hidden;#}
-{#    right: 0;#}
-{#    top: 0;#}
-{#    opacity: 0;#}
-{#        }#}
-{#    </style>#}
+        <script src="../static/js/MyExtend.js"></script>
+
     </head>
     
     <body>
@@ -73,10 +66,11 @@
                     </label>
                     <div class="layui-input-inline">
                       <div class="site-demo-upbar">
-                          <label for="media">
-                              <img src="../static/images/sctp.png">
-                          </label>
-                        <input type="file" id="media" name="media" class="selectFile">
+
+                          <a href="javascript:;" class="file">选择文件
+                            <input type="file" id="media" name="media" value="选择文件" class="selectFile" >
+                        </a>
+                          <label class="showfilename"></label>
 
                       </div>
                         <div class="progress" style="display: none;">
@@ -86,14 +80,10 @@
                         </div>
                     </div>
                 </div>
-{#                <div class="layui-form-item">#}
-{#                    <label  class="layui-form-label">图片#}
-{#                    </label>#}
-{#                    <img id="" width="400" src="">#}
-{#                </div>#}
+
                 <div class="layui-form-item">
                     <label for="desc" class="layui-form-label">
-                        <span class="x-red">*</span>文字信息
+                        <span class="x-red">*</span>内容
                     </label>
                     <div class="layui-input-inline">
                         <textarea id="L_content" name="addContentNew"
@@ -106,8 +96,8 @@
                 <div class="layui-form-item">
                     <label for="L_repass" class="layui-form-label">
                     </label>
-                    <button  class="layui-btn">
-                        增加
+                    <button  class="layui-btn" >
+                        添加
                     </button>
                 </div>
             </form>
@@ -174,6 +164,22 @@
             alert('添加失败');
         });
     });
+
+    $(".file").on("change","input[type='file']",function(){
+    var filePath=$(this).val();
+    if(filePath.indexOf("jpg")!=-1 || filePath.indexOf("png")!=-1){
+        $(".fileerrorTip1").html("").hide();
+        var arr=filePath.split('\\');
+        var fileName=arr[arr.length-1];
+        $(".showfilename").html(fileName);
+    }else{
+        alert("请选择jpg或png的图片格式")
+        $(".showfilename").html("");
+        $(".fileerrorTip1").html("您未上传文件，或者您上传文件类型有误！").show();
+        return false
+    }
+
+})
 </script>
 
     </body>

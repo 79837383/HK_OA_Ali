@@ -13,6 +13,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="format-detection" content="telephone=no">
         <link rel="stylesheet" href="../static/css/x-admin.css" media="all">
+        <link rel="stylesheet" href="../static/css/MyExtend.css" media="all">
 
         <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
         <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
@@ -72,7 +73,13 @@
 {#                        <button>#}
 {#                        <img src="../static/images/sctp.png">#}
 {#                        </button>#}
-                          <input type="file" id="media" name="media" class="selectFile">
+
+                          <a href="javascript:;" class="file">选择文件
+                            <input type="file" id="media" name="media" value="选择文件" class="selectFile" >
+                        </a>
+                          <label class="showfilename"></label>
+
+{#                          <input type="file" id="media" name="media" class="selectFile">#}
                       </div>
                     </div>
                     <div class="progress" style="display: none;">
@@ -162,6 +169,23 @@
                 alert('修改失败');
             });
         });
+
+                $(".file").on("change","input[type='file']",function(){
+        var filePath=$(this).val();
+        if(filePath.indexOf("jpg")!=-1 || filePath.indexOf("png")!=-1){
+            $(".fileerrorTip1").html("").hide();
+            var arr=filePath.split('\\');
+            var fileName=arr[arr.length-1];
+            $(".showfilename").html(fileName);
+        }else{
+            alert("请选择jpg或png的图片格式")
+            $(".showfilename").html("");
+            $(".fileerrorTip1").html("您未上传文件，或者您上传文件类型有误！").show();
+            return false
+        }
+
+    })
+
         </script>
        
     </body>
