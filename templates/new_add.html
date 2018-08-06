@@ -156,9 +156,17 @@
         }).done(function (res) {
             alert('成功!22');
 
-            x_admin_close()
+            parent.location.reload();
 
-            window.open("New",'_self')
+            x_admin_close();
+
+            {#window.top.reload()#}
+
+            {#let ee = document.getElementById("rightFrame")#}
+            {##}
+            {#ee.src = "New"#}
+
+            {#window.open("New",'_self')#}
 
             {#window.opener=null;window.open('','_self');window.close();#}
             {#window.location.href='New';#}
