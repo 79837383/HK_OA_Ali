@@ -150,11 +150,16 @@
                 // 因为这里是由 <form> 表单构造的 FormData 对象，且已经声明了属性 enctype="multipart/form-data"，所以设置为 false
                 contentType: false
             }).done(function (res) {
-                alert('成功!');
-                window.opener=null;window.open('','_self');window.close();
+                alert('修改成功!');
+
+                parent.location.reload();
+
+                x_admin_close();
+
+
                 {#window.location.href='New';#}
             }).fail(function (res) {
-                alert('上传失败!11');
+                alert('修改失败');
             });
         });
         </script>
