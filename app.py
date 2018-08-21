@@ -2,42 +2,12 @@
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-#
-from flask import Flask, render_template, request
+
 from flask_uploads import UploadSet, configure_uploads, ALL
-#
-# app = Flask(__name__)
-#
-# files = UploadSet('files', ALL)
-# app.config['UPLOADS_DEFAULT_DEST'] = 'uploads'
-#
-# configure_uploads(app, files)
-#
-# @app.route('/')
-# @app.route('/upload', methods=['GET', 'POST'])
-# def upload():
-#     if request.method == 'POST' and 'media' in request.files:
-#         filename = files.save(request.files['media'])
-#         url = files.url(filename)
-#     return render_template('testUpLoadFile.html')
-#
-#
-# if __name__ == '__main__':
-#     app.run(debug=True)
-#
-#
 
-
-
-import csv
-import hashlib,os,sys
-import json
-import os
-import types
-
+import os,hashlib,time
 import MySQLdb
-from flask import Flask
-from flask import abort
+
 from flask import g
 from flask import make_response
 from flask import redirect
@@ -45,31 +15,17 @@ from flask import render_template
 from flask import request
 from flask import url_for
 
-
-#import jwt
-import datetime,time
-import time
-
-
 from flask import Flask
-
 from Config import config as myConfig
-
 
 app = Flask(__name__)
 
-
 strUploadPath = 'uploads/'
 strUploadDir = 'NewPics'
-
 files = UploadSet(strUploadDir, ALL)
 app.config['UPLOADS_DEFAULT_DEST'] = strUploadPath
 
 configure_uploads(app, files)
-
-
-
-
 
 
 @app.before_request
@@ -106,8 +62,7 @@ def teardownRequest(exception):
 
 @app.errorhandler(500)
 def page_not_found(error):
-    #return render_template('server_error.html'), 500
-    return "server_exception",500
+    return "sorry,server_exception",500
 
 
 def getExecuteResult(strCMD):
@@ -117,18 +72,6 @@ def getExecuteResult(strCMD):
 def commitExecute(strCMD):
     g.cur.execute(strCMD)
     g.conn.commit()
-
-
-# @app.route('/',methods=['GET','POST'])
-# def test():
-#     if request.method == 'POST':
-#         print"post"
-#
-#
-#     else:
-#         print "get"
-#         return make_response(render_template('testUpLoadFile.html'))
-
 
 @app.route('/')
 @app.route('/index')
@@ -143,9 +86,6 @@ def login():
         print"post"
         strUserName = request.form['loginuser']
         strPW = request.form['loginpwd']
-
-        print("select * from users where UserName='%s';" % strUserName)
-
         userData = getExecuteResult("select UserName,Password,Email,Phone,SigninDate,Activated,extend from users where UserName='%s';" % strUserName)
 
         if userData:
@@ -318,12 +258,7 @@ def NewAddHtml():
 
 @app.route('/NewEdit/<int:oneNewID>',methods=['GET','POST'])
 def NewEditHtml(oneNewID):
-    print "00000"
-    print oneNewID
-
     newOne = getExecuteResult("select * from newList where NewID = %d" %oneNewID)
-
-    print newOne
 
     return render_template('new_edit.html',title='Dangan',newOne=newOne[0])
 
@@ -331,29 +266,16 @@ def NewEditHtml(oneNewID):
 def update(newID):
     print "update"
     if request.method == 'POST' :
-        print "update post"
         if "addModuleNew" in request.form and "addTitleNew" in request.form  :
-            print "update reading"
             nAddModule = int(request.form['addModuleNew'])
             strAddTitle = request.form['addTitleNew']
-            print "00000"
-
-
-
-            print"00001111"
             strAddContent = request.form['addContentNew']
-
-            print"111111"
-
             strSqlCMD = ""
 
             if  'media' in request.files:
                 strAddPicName = request.files['media'].filename
-
                 strAddPicNamemd5 = hashlib.md5(strAddPicName+str(int(time.time())).encode('utf-8')).hexdigest()
                 strFilePath = os.getcwd()+'/'+strUploadPath+strUploadDir
-
-                print"222222"
 
                 filename = files.save(request.files['media'],"",strAddPicNamemd5)
                 strPicUrl = files.url(filename)
@@ -364,9 +286,7 @@ def update(newID):
                 strSqlCMD = "update newList set NewModule='%s',NewTitle='%s',NewContent='%s' where NewID = %d" % \
                             (nAddModule,strAddTitle.encode('utf-8'),strAddContent.encode('utf-8'),newID)
 
-            print "-------------", strSqlCMD
             commitExecute(strSqlCMD)
-
 
             return render_template('New.html')
 
@@ -379,13 +299,9 @@ def delNew(newID):
     print "delNew"
 
     strSqlCMD = "delete from newList where NewID = %d" % newID
-
     commitExecute(strSqlCMD)
 
     return redirect(url_for('NewHtml'))
-
-
-
 
 @app.route('/newDel', methods=['GET', 'POST'])
 def newDel(newID):
@@ -406,9 +322,6 @@ def upload():
 
             filename = files.save(request.files['media'],"",strAddPicNamemd5)
             strPicUrl = files.url(filename)
-
-            # strSqlCMD = "update newList set NewModule='%s',NewTitle='%s',NewPicName='%s',NewPicNameMD5='%s',NewPicPath='%s',NewPicUrl='%s',NewContent='%s' where NewID = %d" % \
-            #                 (nAddModule,strAddTitle.encode('utf-8'), strAddPicName.encode('utf-8'),strAddPicNamemd5, strFilePath,strPicUrl,strAddContent.encode('utf-8'),nID)
 
             strSqlCMD = "insert into newList(NewModule,NewTitle,NewPicName,NewPicNameMD5,NewPicPath,NewPicUrl,NewContent,NewState) " + \
                         "value('%d','%s','%s','%s','%s','%s','%s',%d) " % (nAddModule, strAddTitle.encode('utf-8'), strAddPicName.encode('utf-8'), \
@@ -476,7 +389,5 @@ def linkHtml():
 
 
 if __name__ == '__main__':
-    # reload(sys)
-    # sys.setdefaultencoding('utf-8')
     app.run()
     #app.run(debug=True,host='0.0.0.0',port=5256)
