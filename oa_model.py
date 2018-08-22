@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from setting import objConfig
+from settings import objConfig
 import MySQLdb
 
 class MysqlControl():
