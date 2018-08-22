@@ -1,6 +1,6 @@
-import os
+#-*- coding: utf-8 -*-
 
-class Config():
+class MysqlConf():
     strSQLIP = "127.0.0.1"
     intSQLPort = 3306
 
@@ -8,6 +8,4 @@ class Config():
     strDBPassword = "xing"
     strDBName = "test"
 
-    basedir = os.path.abspath(os.path.dirname(__file__))
-
-config = Config()
+objConfig = MysqlConf()

@@ -3,23 +3,21 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-from flask_uploads import UploadSet, configure_uploads, ALL
-
 import os,hashlib,time
-import MySQLdb
 
-from flask import g
+from flask import Flask
 from flask import make_response
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-
-from flask import Flask
-from Config import config as myConfig
+from flask_uploads import UploadSet, configure_uploads, ALL
+from oa_model import objMysql
 
 app = Flask(__name__)
 
+
+#*************up load file***********
 strUploadPath = 'uploads/'
 strUploadDir = 'NewPics'
 files = UploadSet(strUploadDir, ALL)
@@ -30,48 +28,19 @@ configure_uploads(app, files)
 
 @app.before_request
 def beforeRequest():
-    print "beforeRequest"
-    if not hasattr(g,"conn"):
-        g.IsConnectDB = False
-        try:
-            print "connect db"
-            g.conn = MySQLdb.connect(myConfig.strSQLIP, myConfig.strDBUserName, myConfig.strDBPassword, myConfig.strDBName)
-            g.conn.set_character_set('utf8')
-            g.cur = g.conn.cursor()
-            g.cur.execute('set names utf8mb4;')
-            g.cur.execute('set character_set_connection=utf8;')
-            g.IsConnectDB = True
-        except MySQLdb.Error, e:
-
-            print "connect db error"
-            pass
-        #return False
-    #return True
+    #print "beforeRequest"
+    isOK = objMysql.connect()
+    if not isOK :
+        return "error"
 
 @app.teardown_request
 def teardownRequest(exception):
-    print "teardown_request"
-    if g.IsConnectDB:
-        try:
-            print "close db"
-            g.cur.close()
-            g.conn.close()
-            g.IsConnectDB = False
-        except MySQLdb.Error, e:
-            pass
+    #print "teardown_request"
+    objMysql.close()
 
 @app.errorhandler(500)
 def page_not_found(error):
     return "sorry,server_exception",500
-
-
-def getExecuteResult(strCMD):
-    g.cur.execute(strCMD)
-    return g.cur.fetchall()
-
-def commitExecute(strCMD):
-    g.cur.execute(strCMD)
-    g.conn.commit()
 
 @app.route('/')
 @app.route('/index')
@@ -80,13 +49,11 @@ def home():
 
 @app.route('/login',methods=['GET','POST'])
 def login():
-    print "login"
-
+    #print "login"
     if request.method == 'POST':
-        print"post"
         strUserName = request.form['loginuser']
         strPW = request.form['loginpwd']
-        userData = getExecuteResult("select UserName,Password,Email,Phone,SigninDate,Activated,extend from users where UserName='%s';" % strUserName)
+        userData = objMysql.getExecuteResult("select UserName,Password,Email,Phone,SigninDate,Activated,extend from users where UserName='%s';" % strUserName)
 
         if userData:
             if userData[0][1] == strPW:
@@ -94,45 +61,45 @@ def login():
             else:
                 return redirect(url_for('login'))
         else:
-            print "null"
-
+            pass
+            #print "null"
     else:
         return make_response(render_template('login.html', title='login'))
 
 @app.route('/dataStatistics',methods=['GET','POST'])
 def dataStatistics():
-    print "datasss"
+    #print "datasss"
     return render_template('Download-pic.html',title='data')
 
 
 @app.route('/head',methods=['GET'])
 def headHtml():
-    print "head"
+    #print "head"
     return render_template('head.html',title='head')
 
 @app.route('/left',methods=['GET'])
 def leftHtml():
-    print "left"
+    #print "left"
     return render_template('left.html',title='left')
 
 @app.route('/main',methods=['GET'])
 def mainHtml():
-    print "main"
+    #print "main"
     return render_template('main.html',title='main')
 
 
 #****************start***************
 @app.route('/test',methods=['GET'])
 def testHtml():
-    print "main"
+    #print "test"
     return render_template('test.html',title='test')
 @app.route('/testOne',methods=['GET'])
 def testOneHtml():
-    print "main"
+    #print "testOne"
     return render_template('test-one.html',title='test')
 @app.route('/testTwo',methods=['GET'])
 def testTwoHtml():
-    print "main"
+    #print "testTwo"
     return render_template('test-two.html',title='test')
 #****************end***************
 
@@ -140,29 +107,29 @@ def testTwoHtml():
 #****************start***************
 @app.route('/Dangan',methods=['GET'])
 def DanganHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Dangan.html',title='Dangan')
 @app.route('/DanganAdd',methods=['GET'])
 def DanganAddHtml():
-    print "DanganAdd"
+    #print "DanganAdd"
     return render_template('Dangan-add.html',title='Dangan')
 @app.route('/DanganEdit',methods=['GET'])
 def DanganEditHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Dangan-edit.html',title='Dangan')
 @app.route('/DanganLook',methods=['GET'])
 def DanganLookHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Dangan-look.html',title='Dangan')
 
 
 @app.route('/ShujuOne',methods=['GET'])
 def ShujuOneHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Shuju-one.html',title='Dangan')
 @app.route('/ShujuTwo',methods=['GET'])
 def ShujuTwoHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Shuju-two.html',title='Dangan')
 #****************end***************
 
@@ -171,12 +138,12 @@ def ShujuTwoHtml():
 #****************start***************
 @app.route('/UserManagement',methods=['GET'])
 def UserManagementHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('User_management.html',title='UserManagement')
 
 @app.route('/UserManagementAdd',methods=['GET'])
 def UserManagementAddHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('user_management_add.html',title='UserManagement')
 #****************end***************
 
@@ -186,31 +153,31 @@ def UserManagementAddHtml():
 #****************start***************
 @app.route('/RoleManagement',methods=['GET'])
 def RoleManagementHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Role_management.html',title='RoleManagement')
 @app.route('/RoleManagementAdd',methods=['GET'])
 def RoleManagemenAddtHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('role_management_add.html',title='RoleManagement')
 @app.route('/RoleManagementEdit',methods=['GET'])
 def RoleManagementEditHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('role_management_edit.html',title='RoleManagement')
 #****************end***************
 
 @app.route('/WarningManagement',methods=['GET'])
 def WarningManagementHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Warning_management.html',title='Dangan')
 
 @app.route('/DataManagement',methods=['GET'])
 def DataManagementHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Data_management.html',title='Dangan')
 
 @app.route('/shujutongji',methods=['GET'])
 def shujutongjiHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('shujutongji.html',title='Dangan')
 
 
@@ -219,11 +186,11 @@ def shujutongjiHtml():
 
 @app.route('/Home',methods=['GET'])
 def HomeHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Home.html',title='Dangan')
 @app.route('/HomeAdd',methods=['GET'])
 def HomeAddHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('home_add.html',title='Dangan')
 #****************end***************
 
@@ -231,11 +198,11 @@ def HomeAddHtml():
 #****************start***************
 @app.route('/AboutUs',methods=['GET'])
 def AboutUsHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('About_us.html',title='Dangan')
 @app.route('/AboutUsAdd',methods=['GET'])
 def AboutUsAddHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('about_us_add.html',title='Dangan')
 #****************end***************
 
@@ -244,27 +211,24 @@ def AboutUsAddHtml():
 
 @app.route('/New',methods=['GET'])
 def NewHtml():
-    print "Dangan"
-    newList = getExecuteResult("select * from newList")
-    # for user in newList:
-    #     print user
-
+    #print "NewHtml"
+    newList = objMysql.getExecuteResult("select * from newList")
     return render_template('New.html',title='new',newList=newList)
 
 @app.route('/NewAdd',methods=['GET','POST'])
 def NewAddHtml():
-    print "Dangan"
+    #print "NewAddHtml"
     return render_template('new_add.html',title='Dangan')
 
 @app.route('/NewEdit/<int:oneNewID>',methods=['GET','POST'])
 def NewEditHtml(oneNewID):
-    newOne = getExecuteResult("select * from newList where NewID = %d" %oneNewID)
-
+    #print "NewEditHtml"
+    newOne = objMysql.getExecuteResult("select * from newList where NewID = %d" %oneNewID)
     return render_template('new_edit.html',title='Dangan',newOne=newOne[0])
 
 @app.route('/update/<int:newID>', methods=['GET', 'POST'])
 def update(newID):
-    print "update"
+    #print "update"
     if request.method == 'POST' :
         if "addModuleNew" in request.form and "addTitleNew" in request.form  :
             nAddModule = int(request.form['addModuleNew'])
@@ -286,26 +250,26 @@ def update(newID):
                 strSqlCMD = "update newList set NewModule='%s',NewTitle='%s',NewContent='%s' where NewID = %d" % \
                             (nAddModule,strAddTitle.encode('utf-8'),strAddContent.encode('utf-8'),newID)
 
-            commitExecute(strSqlCMD)
+            objMysql.commitExecute(strSqlCMD)
 
             return render_template('New.html')
 
         else:
-            print "read error........................"
+            #print "read error........................"
             return render_template('new_edit.html')
 
 @app.route('/delNew/<int:newID>', methods=['GET', 'POST'])
 def delNew(newID):
-    print "delNew"
+    #print "delNew"
 
     strSqlCMD = "delete from newList where NewID = %d" % newID
-    commitExecute(strSqlCMD)
+    objMysql.commitExecute(strSqlCMD)
 
     return redirect(url_for('NewHtml'))
 
 @app.route('/newDel', methods=['GET', 'POST'])
 def newDel(newID):
-    print "newDel"
+    #print "newDel"
     return render_template('New.html')
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -327,11 +291,11 @@ def upload():
                         "value('%d','%s','%s','%s','%s','%s','%s',%d) " % (nAddModule, strAddTitle.encode('utf-8'), strAddPicName.encode('utf-8'), \
                                                                       strAddPicNamemd5, strFilePath,strPicUrl,strAddContent.encode('utf-8'),1)
 
-            commitExecute(strSqlCMD)
+            objMysql.commitExecute(strSqlCMD)
             return render_template('New.html')
 
         else:
-            print "read error........................"
+            #print "read error"
             return render_template('new_add.html')
 
 
@@ -341,53 +305,49 @@ def upload():
 #****************start***************
 @app.route('/DownloadPic',methods=['GET'])
 def DownloadPicHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Download-pic.html',title='Dangan')
 @app.route('/DownloadPicAdd',methods=['GET'])
 def DownloadPicAddHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('download_picadd.html',title='Dangan')
 @app.route('/DownloadPicEdit',methods=['GET'])
 def DownloadPicEidtHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('download_picedit.html',title='Dangan')
 
 
 @app.route('/DownloadBook',methods=['GET'])
 def DownloadBookHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Download-book.html',title='Dangan')
 @app.route('/DownloadBookAdd',methods=['GET'])
 def DownloadBookAddHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('download_bookadd.html',title='Dangan')
 @app.route('/DownloadBookEdit',methods=['GET'])
 def DownloadBookEditHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('download_bookedit.html',title='Dangan')
 
 
 @app.route('/DownloadVoid',methods=['GET'])
 def DownloadVoidHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('Download-void.html',title='Dangan')
 @app.route('/DownloadVoidAdd',methods=['GET'])
 def DownloadVoidAddHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('download_voidadd.html',title='Dangan')
 @app.route('/DownloadVoidEdit',methods=['GET'])
 def DownloadVoidEditHtml():
-    print "Dangan"
+    #print "Dangan"
     return render_template('download_voidedit.html',title='Dangan')
 #****************end***************
 
 @app.route('/link',methods=['GET'])
 def linkHtml():
-    print "link"
+    #print "link"
     return render_template('link.html',title='Dangan')
 
 
-
-if __name__ == '__main__':
-    app.run()
-    #app.run(debug=True,host='0.0.0.0',port=5256)
