@@ -145,21 +145,8 @@
             contentType: false
         }).done(function (res) {
             alert('添加成功');
-
             parent.location.reload();
-
             x_admin_close();
-
-            {#window.top.reload()#}
-
-            {#let ee = document.getElementById("rightFrame")#}
-            {##}
-            {#ee.src = "New"#}
-
-            {#window.open("New",'_self')#}
-
-            {#window.opener=null;window.open('','_self');window.close();#}
-            {#window.location.href='New';#}
         }).fail(function (res) {
             alert('添加失败');
         });
