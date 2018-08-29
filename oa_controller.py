@@ -11,7 +11,7 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-from flask_uploads import UploadSet, configure_uploads, ALL
+from flask_uploads import UploadSet, configure_uploads, ALL,IMAGES
 from oa_model import objMysql
 
 app = Flask(__name__)
@@ -61,8 +61,9 @@ def login():
             else:
                 return redirect(url_for('login'))
         else:
-            pass
             #print "null"
+            pass
+
     else:
         return make_response(render_template('login.html', title='login'))
 
@@ -284,8 +285,13 @@ def upload():
             strAddPicNamemd5 = hashlib.md5(strAddPicName+str(int(time.time())).encode('utf-8')).hexdigest()
             strFilePath = os.getcwd()+'/'+strUploadPath+strUploadDir
 
-            filename = files.save(request.files['media'],"",strAddPicNamemd5)
+            #filename = files.save(request.files['media'],strFilePath+"/",strAddPicNamemd5)
+            filename = files.save(request.files['media'], "", strAddPicNamemd5)
             strPicUrl = files.url(filename)
+
+            print filename
+
+            print strFilePath
 
             strSqlCMD = "insert into newList(NewModule,NewTitle,NewPicName,NewPicNameMD5,NewPicPath,NewPicUrl,NewContent,NewState) " + \
                         "value('%d','%s','%s','%s','%s','%s','%s',%d) " % (nAddModule, strAddTitle.encode('utf-8'), strAddPicName.encode('utf-8'), \
