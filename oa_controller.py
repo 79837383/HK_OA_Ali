@@ -11,7 +11,7 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-from flask_uploads import UploadSet, configure_uploads, ALL,IMAGES
+from flask_uploads import UploadSet, configure_uploads, ALL
 from oa_model import objMysql
 
 app = Flask(__name__)
